@@ -153,9 +153,9 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         if len(result) > 4096:
             for i in range(0, len(result), 4096):
-                await query.message.reply_text(result[i:i+4096])
+                await query.message.reply_text(result[i:i+4096], parse_mode='Markdown')
         else:
-            await query.message.reply_text(result)
+            await query.message.reply_text(result, parse_mode='Markdown')
 
         logger.info(f"Пользователь {query.from_user.id} выполнил анализ: {analysis_type}")
 
