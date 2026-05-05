@@ -38,6 +38,9 @@ class NutritionistAnalyzer:
             response = self.model.generate_content([prompt, {"mime_type": "image/jpeg", "data": image_data}])
             return response.text
         except Exception as e:
+            error_str = str(e)
+            if "429" in error_str or "quota" in error_str.lower() or "rate" in error_str.lower():
+                return "⏳ <b>Превышен дневной лимит запросов к AI</b>\n\nК сожалению, сегодня исчерпан лимит бесплатных запросов к нейросети. Попробуйте снова завтра или немного позже.\n\n💡 Это ограничение API, а не бота."
             logger.error(f"Ошибка анализа калорий: {e}")
             return f"Ошибка при анализе изображения: {str(e)}"
 
@@ -74,6 +77,9 @@ class NutritionistAnalyzer:
             response = self.model.generate_content([prompt, {"mime_type": "image/jpeg", "data": image_data}])
             return response.text
         except Exception as e:
+            error_str = str(e)
+            if "429" in error_str or "quota" in error_str.lower() or "rate" in error_str.lower():
+                return "⏳ <b>Превышен дневной лимит запросов к AI</b>\n\nК сожалению, сегодня исчерпан лимит бесплатных запросов к нейросети. Попробуйте снова завтра или немного позже.\n\n💡 Это ограничение API, а не бота."
             logger.error(f"Ошибка анализа состава: {e}")
             return f"Ошибка при анализе состава: {str(e)}"
 
@@ -102,6 +108,9 @@ class NutritionistAnalyzer:
             response = self.model.generate_content([prompt, {"mime_type": "image/jpeg", "data": image_data}])
             return response.text
         except Exception as e:
+            error_str = str(e)
+            if "429" in error_str or "quota" in error_str.lower() or "rate" in error_str.lower():
+                return "⏳ <b>Превышен дневной лимит запросов к AI</b>\n\nК сожалению, сегодня исчерпан лимит бесплатных запросов к нейросети. Попробуйте снова завтра или немного позже.\n\n💡 Это ограничение API, а не бота."
             logger.error(f"Ошибка анализа еды: {e}")
             return f"Ошибка при анализе еды: {str(e)}"
 
@@ -137,6 +146,9 @@ class NutritionistAnalyzer:
             response = self.model.generate_content([prompt, {"mime_type": "image/jpeg", "data": image_data}])
             return response.text
         except Exception as e:
+            error_str = str(e)
+            if "429" in error_str or "quota" in error_str.lower() or "rate" in error_str.lower():
+                return "⏳ <b>Превышен дневной лимит запросов к AI</b>\n\nК сожалению, сегодня исчерпан лимит бесплатных запросов к нейросети. Попробуйте снова завтра или немного позже.\n\n💡 Это ограничение API, а не бота."
             logger.error(f"Ошибка анализа медицинских данных: {e}")
             return f"Ошибка при анализе анализов: {str(e)}"
 
@@ -175,5 +187,8 @@ class NutritionistAnalyzer:
             response = self.model.generate_content([prompt, {"mime_type": "image/jpeg", "data": image_data}])
             return response.text
         except Exception as e:
+            error_str = str(e)
+            if "429" in error_str or "quota" in error_str.lower() or "rate" in error_str.lower():
+                return "⏳ <b>Превышен дневной лимит запросов к AI</b>\n\nК сожалению, сегодня исчерпан лимит бесплатных запросов к нейросети. Попробуйте снова завтра или немного позже.\n\n💡 Это ограничение API, а не бота."
             logger.error(f"Ошибка анализа фекалий: {e}")
             return f"Ошибка при анализе: {str(e)}"
