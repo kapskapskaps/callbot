@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 class NutritionistAnalyzer:
     def __init__(self, api_key: str):
         genai.configure(api_key=api_key)
-        self.model = genai.GenerativeModel('gemini-1.5-flash')
+        self.model = genai.GenerativeModel('gemini-1.5-flash-latest')
 
     async def analyze_calories(self, image_data: bytes) -> str:
         """Анализ калорийности блюда по фото"""
