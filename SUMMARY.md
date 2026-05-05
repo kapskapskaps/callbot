@@ -99,7 +99,7 @@ chmod +x install.sh
 
 - **Язык**: Python 3.11
 - **Telegram API**: python-telegram-bot 20.8
-- **AI**: Google Gemini 1.5 Flash
+- **AI**: Google Gemini 2.5 Flash
 - **Контейнеризация**: Docker + Docker Compose
 - **ОС**: Ubuntu 22.04 (рекомендуется)
 

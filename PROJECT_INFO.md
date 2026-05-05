@@ -131,7 +131,7 @@ callbot/
 - **Ubuntu 22.04** - целевая ОС
 
 ### AI
-- **Google Gemini 1.5 Flash** - мультимодальная AI модель
+- **Google Gemini 2.5 Flash** - мультимодальная AI модель
 - **Vision API** - анализ изображений
 - **Natural Language Processing** - генерация текста
 

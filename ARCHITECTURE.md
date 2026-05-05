@@ -82,7 +82,7 @@
 │                    GOOGLE GEMINI API                             │
 │                  (generativelanguage.googleapis.com)             │
 │  ┌───────────────────────────────────────────────────────────┐  │
-│  │  Gemini 1.5 Flash Model                                   │  │
+│  │  Gemini 2.5 Flash Model                                   │  │
 │  │  - Multimodal AI (текст + изображения)                    │  │
 │  │  - Анализ изображений                                     │  │
 │  │  - Генерация текстовых ответов                            │  │
@@ -174,7 +174,7 @@ Gemini API → Bot → Telegram → Пользователь
 class NutritionistAnalyzer:
     def __init__(self, api_key: str)
         # Инициализация Gemini API
-        # Создание модели gemini-1.5-flash
+        # Создание модели gemini-2.5-flash
     
     async def analyze_calories(image_data: bytes) -> str
         # Промпт: анализ калорийности
