@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python *)",
+      "Bash(awk '{print $9, $5}')",
+      "Bash(grep -E \"\\\\.\\(py|md|yml|txt|sh\\)$|Dockerfile\")",
+      "Bash(awk '{sum+=$5} END {print \"Total files size:\", sum/1024, \"KB\"}')",
+      "Bash(echo \"Всего файлов: $\\(find . -type f \\\\\\( -name \"*.py\" -o -name \"*.md\" -o -name \"*.yml\" -o -name \"*.txt\" -o -name \"Dockerfile\" -o -name \"*.sh\" -o -name \"LICENSE\" -o -name \".env.example\" -o -name \".gitignore\" \\\\\\) -not -path \"./__pycache__/*\")",
+      "Bash(awk '{print \"  Проект: \" $1}')",
+      "Bash(grep -E \"\\\\.\\(py|md|yml|txt|sh\\)$|Dockerfile|LICENSE\")",
+      "Bash(echo \"📁 Всего файлов создано: $\\(find . -type f \\\\\\( -name \"*.py\" -o -name \"*.md\" -o -name \"*.yml\" -o -name \"*.txt\" -o -name \"Dockerfile\" -o -name \"*.sh\" -o -name \"LICENSE\" -o -name \".env.example\" -o -name \".gitignore\" -o -name \".dockerignore\" \\\\\\) -not -path \"./__pycache__/*\")",
+      "Bash(git init *)",
+      "Bash(git config *)",
+      "Bash(git add *)"
+    ]
+  }
+}
