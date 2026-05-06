@@ -44,12 +44,14 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 🥗 Дать рекомендации по питанию
 🩺 Изучить медицинские анализы
 💩 Проанализировать фекалии (копрограмма)
+💬 Профессиональная консультация (/ask)
 
 Просто отправьте мне фото, и я предложу варианты анализа!
 
 Команды:
 /start - Показать это сообщение
 /help - Подробная справка
+/ask - Задать вопрос эксперту-нутрициологу
 """
     await update.message.reply_text(welcome_text)
 
@@ -88,6 +90,10 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 - Определю возможные проблемы с пищеварением
 - Дам рекомендации по питанию и режиму
 
+💬 **Консультация эксперта (/ask)**
+Используйте команду /ask для серьезных вопросов:
+Пример: /ask Можно ли есть творог при повышенном холестерине?
+
 ⚠️ **Важно**: Мои рекомендации не заменяют консультацию врача!
 
 Просто отправьте фото, и выберите тип анализа из меню."""
@@ -95,29 +101,48 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Обработчик фотографий"""
-    keyboard = [
-        [
-            InlineKeyboardButton("🍽 Калории", callback_data='calories'),
-            InlineKeyboardButton("📋 Состав", callback_data='composition'),
-        ],
-        [
-            InlineKeyboardButton("🥗 Оценить блюдо", callback_data='food'),
-            InlineKeyboardButton("🩺 Анализы", callback_data='medical'),
-        ],
-        [
-            InlineKeyboardButton("💩 Анализ стула", callback_data='stool'),
-        ]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-
+    """Обработчик фотографий - stateless быстрый анализ"""
     photo = update.message.photo[-1]
-    context.user_data['photo_file_id'] = photo.file_id
 
-    await update.message.reply_text(
-        "Что вы хотите узнать об этом изображении?",
-        reply_markup=reply_markup
-    )
+    await update.message.reply_text("⏳ Анализирую фото...")
+
+    try:
+        file = await context.bot.get_file(photo.file_id)
+        photo_bytes = await file.download_as_bytearray()
+
+        # Stateless анализ без контекста
+        result = await analyzer.analyze_photo_stateless(bytes(photo_bytes))
+
+        await update.message.reply_text(result)
+
+        # Предлагаем детальный анализ
+        keyboard = [
+            [
+                InlineKeyboardButton("🍽 Калории", callback_data='calories'),
+                InlineKeyboardButton("📋 Состав", callback_data='composition'),
+            ],
+            [
+                InlineKeyboardButton("🥗 Оценить блюдо", callback_data='food'),
+                InlineKeyboardButton("🩺 Анализы", callback_data='medical'),
+            ],
+            [
+                InlineKeyboardButton("💩 Анализ стула", callback_data='stool'),
+            ]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+
+        context.user_data['photo_file_id'] = photo.file_id
+
+        await update.message.reply_text(
+            "Нужен детальный анализ? Выберите тип:",
+            reply_markup=reply_markup
+        )
+
+        logger.info(f"Пользователь {update.message.from_user.id} отправил фото")
+
+    except Exception as e:
+        logger.error(f"Ошибка при обработке фото: {e}")
+        await update.message.reply_text(f"Произошла ошибка при анализе: {str(e)}")
 
 
 async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -167,9 +192,61 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Обработчик текстовых сообщений"""
     await update.message.reply_text(
-        "Пожалуйста, отправьте мне фото для анализа.\n\n"
+        "Пожалуйста, отправьте мне фото для анализа или используйте /ask для консультации.\n\n"
         "Используйте /help для получения подробной информации."
     )
+
+
+async def ask_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Обработчик команды /ask для профессиональных консультаций"""
+    user_id = update.message.from_user.id
+
+    # Получаем текст вопроса (все после /ask)
+    question = update.message.text.replace('/ask', '').strip()
+
+    if not question:
+        await update.message.reply_text(
+            "Используйте команду так: /ask ваш вопрос\n\n"
+            "Пример: /ask Можно ли есть творог при повышенном холестерине?"
+        )
+        return
+
+    await update.message.reply_text("⏳ Консультирую...")
+
+    try:
+        # Инициализируем историю сообщений пользователя, если её нет
+        if 'message_history' not in context.user_data:
+            context.user_data['message_history'] = []
+
+        # Добавляем текущий вопрос в историю
+        context.user_data['message_history'].append({
+            'role': 'user',
+            'content': question
+        })
+
+        # Получаем ответ с ограниченным контекстом (последние 3 сообщения)
+        result = await analyzer.ask_consultation(
+            question,
+            context.user_data['message_history']
+        )
+
+        # Добавляем ответ бота в историю
+        context.user_data['message_history'].append({
+            'role': 'assistant',
+            'content': result
+        })
+
+        # Ограничиваем историю последними 10 сообщениями (5 пар вопрос-ответ)
+        if len(context.user_data['message_history']) > 10:
+            context.user_data['message_history'] = context.user_data['message_history'][-10:]
+
+        await update.message.reply_text(result)
+
+        logger.info(f"Пользователь {user_id} задал вопрос через /ask")
+
+    except Exception as e:
+        logger.error(f"Ошибка при обработке /ask: {e}")
+        await update.message.reply_text(f"Произошла ошибка: {str(e)}")
 
 
 async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -190,6 +267,7 @@ def main():
 
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("help", help_command))
+    application.add_handler(CommandHandler("ask", ask_command))
     application.add_handler(MessageHandler(filters.PHOTO, handle_photo))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text))
     application.add_handler(CallbackQueryHandler(button_callback))
