@@ -104,7 +104,8 @@ async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Обработчик фотографий - stateless быстрый анализ"""
     photo = update.message.photo[-1]
 
-    await update.message.reply_text("⏳ Анализирую фото...")
+    # Отправляем промежуточное сообщение с анимацией
+    status_message = await update.message.reply_text("⏳ Анализирую фото...")
 
     try:
         file = await context.bot.get_file(photo.file_id)
@@ -112,6 +113,9 @@ async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         # Stateless анализ без контекста
         result = await analyzer.analyze_photo_stateless(bytes(photo_bytes))
+
+        # Удаляем промежуточное сообщение
+        await status_message.delete()
 
         await update.message.reply_text(result)
 
@@ -157,7 +161,10 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.edit_message_text("Ошибка: фото не найдено. Отправьте фото заново.")
         return
 
-    await query.edit_message_text(f"⏳ Анализирую изображение ({ANALYSIS_TYPES[analysis_type]})...\nЭто может занять несколько секунд.")
+    # Отправляем промежуточное сообщение с анимацией
+    status_message = await query.message.reply_text(
+        f"⏳ Анализирую изображение ({ANALYSIS_TYPES[analysis_type]})...\nЭто может занять несколько секунд."
+    )
 
     try:
         file = await context.bot.get_file(photo_file_id)
@@ -176,6 +183,9 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         else:
             result = "Неизвестный тип анализа"
 
+        # Удаляем промежуточное сообщение
+        await status_message.delete()
+
         if len(result) > 4096:
             for i in range(0, len(result), 4096):
                 await query.message.reply_text(result[i:i+4096], parse_mode='HTML')
@@ -186,6 +196,7 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     except Exception as e:
         logger.error(f"Ошибка при обработке фото: {e}")
+        await status_message.delete()
         await query.message.reply_text(f"Произошла ошибка при анализе: {str(e)}")
 
 
@@ -211,7 +222,8 @@ async def ask_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         return
 
-    await update.message.reply_text("⏳ Консультирую...")
+    # Отправляем промежуточное сообщение с анимацией
+    status_message = await update.message.reply_text("⏳ Консультирую...")
 
     try:
         # Инициализируем историю сообщений пользователя, если её нет
@@ -240,12 +252,16 @@ async def ask_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if len(context.user_data['message_history']) > 10:
             context.user_data['message_history'] = context.user_data['message_history'][-10:]
 
+        # Удаляем промежуточное сообщение
+        await status_message.delete()
+
         await update.message.reply_text(result)
 
         logger.info(f"Пользователь {user_id} задал вопрос через /ask")
 
     except Exception as e:
         logger.error(f"Ошибка при обработке /ask: {e}")
+        await status_message.delete()
         await update.message.reply_text(f"Произошла ошибка: {str(e)}")
 
 
